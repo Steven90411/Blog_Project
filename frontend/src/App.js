@@ -1,29 +1,64 @@
-import React, { useEffect, useState } from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import Index from './index0';
+import LoginPage from './pages/LoginPage';
+import Register from './pages/Register';
+import ArticlesPage from './pages/ArticlesPage';
+import Test1 from './Test1';
 
-function App() {
-  
-    const [data, setData] = useState(null);
+import SingleArticle from './pages/SingleArticle';
 
-    useEffect(() => {
-      fetch('http://localhost:8080/blog-0.0.1-SNAPSHOT/api/data')
-          .then(response => {
-              if (!response.ok) {
-                  throw new Error('Network response was not ok');
-              }
-              return response.json();
-          })
-          .then(data => setData(data))
-          .catch(error => console.error('There was a problem with your fetch operation:', error));
-    }, []);
+import UserData from './pages/UserData';
+import OnePage from './pages/OnePage';
 
-    return (
-        <div>
-            <h1>Data from Spring Boot:</h1>
-            {data ? <p>{data.message}</p> : <p>Loading...</p>}
-        </div>
-    );
-}
+import ArticleEditor from './pages/ArticleEditor';
+import './styles/App.css';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
+import ResetPasswordPage from './ResetPasswordPage ';
+import Header from './components/Header';
+import Footer from './components/Footer';
+import SearchBar from './components/SearchBar';
+import EmailVerificationPage from './pages/EmailVerificationPage';
+
+const App = () => {
+
+  // 提升状态到父组件
+  const [username, setUsername] = useState('');
+  const [userImage, setUserImage] = useState('');
+
+  // 登录成功时调用这个函数更新状态
+  const handleLoginSuccess = (userData) => {
+    setUsername(userData.username);
+    setUserImage(userData.userImage);
+  };
+
+  return (
+    <Router>
+      <Header username={username} userImage={userImage} /> 
+    <main>
+      <Routes>
+        <Route path="/" element={<Index />} />
+        <Route path="/login" element={<LoginPage onLoginSuccess={handleLoginSuccess} />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/test1" element={<Test1 />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
+        <Route path="/articlesPage" element={<ArticlesPage />} />
+
+        <Route path="/singleArticle/:articleId" element={<SingleArticle />} /> 
+
+        <Route path='/publish-article' element={<ArticleEditor />} />
+        <Route path="/UserData" element={<UserData />} />
+        <Route path="/onePage/:id" element={<OnePage />} /> 
+
+        <Route path="/edit-article/:articleId" element={<ArticleEditor />} />
+        <Route path="/verify-email" element={<EmailVerificationPage />} />
+        {/* 你可以在这里添加更多的路由 */}
+      </Routes>
+    </main>s
+    <Footer />
+  </Router>
+  );
+};
 
 export default App;

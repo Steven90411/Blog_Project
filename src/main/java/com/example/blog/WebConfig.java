@@ -1,30 +1,24 @@
 package com.example.blog;
-
-import org.springframework.context.annotation.Bean;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
-import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
-
+	
+	@Value("${cors.allowed.origins}")
+	private String allowedOrigins;  // 此变量用于存储配置文件中的 CORS origins
+	
     @Override
-    public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        registry.addResourceHandler("/resourse/**")
-        .addResourceLocations("/resourse/");
+    public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/**")
+                .allowedOrigins(allowedOrigins)
+                //.allowedOrigins("http://localhost:3000")
+                .allowedMethods("*") // 允許的方法
+                .allowCredentials(true)
+                .allowedHeaders("*");
     }
-    @Bean
-    public WebMvcConfigurer corsConfigurer() {
-        return new WebMvcConfigurer() {
-            @Override
-            public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/api/**")
-                        .allowedOrigins("http://localhost:3000") // 允許React前端的來源
-                        .allowedMethods("GET", "POST", "PUT", "DELETE");
-            }
-        };
-    }
+
 
 }
