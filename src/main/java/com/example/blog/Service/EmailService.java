@@ -1,5 +1,6 @@
 package com.example.blog.Service;
 
+
 import java.time.LocalDateTime;
 import java.util.Optional;
 
@@ -20,14 +21,8 @@ public class EmailService {
     @Autowired
     private AccountRepository accountRepository;
 
-    @Autowired
     public EmailService(JavaMailSender mailSender) {
         this.mailSender = mailSender;
-    }
-
-    public EmailService() {
-        this.mailSender = null;
-        return;
     }
 
     public void sendResetPasswordEmail(AccountVo vo, String token) {
@@ -53,6 +48,7 @@ public class EmailService {
                 "請點擊以下鏈接以驗證您的電子郵件地址：\n" + verificationUrl +
                 "\n\n謝謝！";
 
+
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(vo.getEmail());
         message.setSubject(subject);
@@ -63,13 +59,11 @@ public class EmailService {
 
     public String verifyEmail(String token) {
         Optional<AccountVo> vo = accountRepository.findByVerificationToken(token);
-
         if (!vo.isPresent()) {
             return "無效的驗證鏈接";
         }
 
         AccountVo account = vo.get();
-
         if (account.getTokenExpiration().isBefore(LocalDateTime.now())) {
             return "驗證鏈接已過期";
         }
@@ -81,5 +75,4 @@ public class EmailService {
 
         return "您的帳號已成功驗證";
     }
-
 }

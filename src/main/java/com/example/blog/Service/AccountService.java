@@ -5,13 +5,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.security.Principal;
 import java.time.LocalDateTime;
-import java.util.Map;
 import java.util.Optional;
 
 import com.example.blog.Model.AccountVo;
+
 import com.example.blog.Repository.AccountRepository;
+
 
 @Service
 public class AccountService {
@@ -22,6 +22,8 @@ public class AccountService {
     @Autowired
     private EmailService emailService;
     
+
+
     // 檢查用戶名是否已存在
     public boolean checkId(String username) {
         return accountRepository.findByUsername(username).isPresent();
@@ -39,10 +41,6 @@ public class AccountService {
                                 .orElse(false);
     }
     
-    public Optional<String> checkImageLink(String username) {
-        return accountRepository.findImageLinkByUsername(username);
-    }
-    
     // 檢查使用者輸入密碼是否正確，錯誤則計數，滿三次鎖定帳戶
     private static final int MAX_LOGIN_ATTEMPTS = 5;
 
@@ -53,10 +51,11 @@ public class AccountService {
             AccountVo vo = optionalUser.get();
 
             if (vo.getPassword().equals(inputPassword)) {
+
                 vo.setLoginAttempts(0); // 重置登錄嘗試次數
                 vo.setLastLoginDate(LocalDateTime.now()); //設置最後登入時間
                 accountRepository.save(vo);
-                
+
                 return ResponseEntity.ok("登入成功");
             } else {
                 int attempts = vo.getLoginAttempts() + 1;
@@ -76,18 +75,18 @@ public class AccountService {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("用戶名或密碼錯誤");
     }
     
+
     // 插入新用戶資料
     public boolean insertUser(AccountVo vo) {
         try {
             String token = setVerificationToken(vo);
             vo.setCreatedDate(LocalDateTime.now()); //設置註冊日期
-            
             // 發送郵件
             emailService.sendVerificationEmail(vo, token);
             accountRepository.save(vo);
             return true;
         } catch (Exception e) {
-        	
+
             return false;
         }
     }
@@ -118,13 +117,12 @@ public class AccountService {
         // 通过用户名查找用户
         AccountVo account = accountRepository.findByUsername(vo.getUsername())
                                              .orElseThrow(() -> new RuntimeException("用户不存在"));
-
         // 更新密码
         account.setPassword(newPassword);
-
         // 保存更新后的用户信息
         accountRepository.save(account);
     }
+
 
     // 根據用戶名查找帳戶
     public Optional<AccountVo> findByUsername(String username) {
@@ -148,16 +146,16 @@ public class AccountService {
     }
     
     //設置生成的token至資料庫
+
     public String setVerificationToken(AccountVo vo) {
         String token = generateVerificationToken(); // 自定義方法生成驗證 token
         vo.setVerificationToken(token);
         vo.setTokenExpiration(LocalDateTime.now().plusHours(24));  // 設置24小時過期時間
         accountRepository.save(vo);  // 保存帳戶
-        
         return token;
     }
     
-    // 驗證帳戶
+    // 驗證帳戶(Email)
     public boolean verifyAccount(String token) {
         Optional<AccountVo> accountOpt = findByVerificationToken(token);
         if (accountOpt.isPresent()) {
@@ -172,8 +170,7 @@ public class AccountService {
     }
 
 	public String findImageLinkByUsername(String username) {
-		// TODO Auto-generated method stub
-		return null;
+		
+		return accountRepository.findImageLinkByUsername(username);
 	}
-    
 }
